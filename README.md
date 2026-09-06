@@ -1,0 +1,2 @@
+# CustomLanguage-JVM-Compiler
+Compilador desenvolvido em Java utilizando JavaCC para uma linguagem de alto nível customizada, capaz de traduzir código-fonte em assembly Jasmin (.j) para execução na Máquina Virtual Java (JVM). O projeto suporta múltiplos tipos de dados (INT, DOUBLE, STRING, BOOL, CHAR), expressões aritméticas/lógicas avançadas, operadores ternários, estruturas condicionais (if-else, switch-case) e laços de repetição (while, for, do-while).
