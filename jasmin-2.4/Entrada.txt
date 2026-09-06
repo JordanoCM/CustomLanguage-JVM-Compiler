@@ -1,0 +1,90 @@
+/*'
+
+ CODIGO DE INTEGRACAO NUMERICA 
+ 
+'*/
+
+DOUBLE a = 0;
+DOUBLE b = 1;
+DOUBLE e = 2.718281828459045;
+INT n = 1000;
+DOUBLE h = (b - a) / n;
+DOUBLE soma = e^a * a^2 + e^b * b^2;
+DOUBLE x = 0;
+
+for (INT i = 1; i < n; i++) {
+    x = a + i * h;
+    soma = soma + 2 * (e^x * x^2);
+}
+
+DOUBLE resultado = (h / 2) * soma;
+
+/*' 
+
+    UTILIZANDO EXPRESSAO TERNARIA
+
+'*/
+
+STRING mensagem := (resultado>0) ? 'Resultado da integracao ' : 'ERRO ';
+print  mensagem + resultado;
+
+for(INT j = 0; j < 3; j++){
+    for(INT i = 0; i < 10; i++){
+        print j + i;
+    }
+}
+
+if(resultado > 0 && resultado < 1) then{
+    print 'esta entre 0 e 1';
+    if(resultado > 0.5) then {
+        print 'e maior que 0.5';
+        if(mensagem != 'ERRO ') then {
+            print 'O resultado e ' + resultado;
+        }
+    }
+    else{
+        print 'e menor que 0.5';
+    }
+}
+
+if(resultado > 1) then{
+    print 'e maior que 1';
+}
+else{
+    print 'else funcionando';
+}
+INT z = 0;
+do  {
+    switch (z){
+        case 0:
+            print 0;
+            break;
+        case 1:
+            print 1;
+            break;
+        case 2:
+            print 2;
+            break;
+        case 3:
+            print 3;
+            break;
+        default:
+            print 'maior que 3 o valor e ' + z;
+    }
+    z++;
+} while(z < 10);
+
+INT l = 2;
+INT KL = 9;
+
+while (l>=0) {
+    while (KL >= 0) {
+        print l + KL;
+        KL --;
+    }
+    KL = 9;
+    l--;
+}
+
+
+

@@ -1,0 +1,684 @@
+/*
+A linguagem fonte é simples, sendo formada por somente dois comandos:
+1. Comando de atribuição onde variáveis recebem expressões contendo valores representados por números romanos de 1 a 39;
+2. Comando de exibição de variável.
+Detalhes:
+i. os números são sempre escritos em romanos e em letras maiúsculas.
+ii. as variáveis, que não precisam de ser declaradas, são formadas por letra(s) minúscula(s).
+iii. o caractere de finalização de comando é o ponto-e-vírgula.
+iv.  comentários não são aceitos.
+v.  o comando de exibição só aceita uma variável e apresenta o valor em arábicos.
+*/
+
+
+/*  CompiladorExemplo.jj  -  Analisador Semântico */
+options {
+  DEBUG_PARSER = false;
+  DEBUG_TOKEN_MANAGER = false;
+}
+
+PARSER_BEGIN(CompiladorExemploIntermediarioTotal)
+import java.io.*;
+import java.util.LinkedList;
+
+public class CompiladorExemploIntermediarioTotal {
+   static Tabela tabela = new Tabela();
+   static LinkedList <Comando>  listaComandos;
+   public static int ifref = 1;
+   public static int printref = 1;
+   public static void main(String args[])  throws ParseException  {
+       // CompiladorExemplo analisador = null;
+        try
+   {      
+    CompiladorExemploIntermediarioTotal analisador = new CompiladorExemploIntermediarioTotal (System.in);
+    listaComandos = analisador.inicio(); 
+    System.out.println(listaComandos);
+    GeradorCodigoDestino.geraCodigoAssembler(listaComandos);
+    
+    System.out.println("Compilado....");
+  }   
+  catch(TokenMgrError e) {
+  System.err.println("Lexical Error:\n" + e.getMessage()); 
+ }
+  catch(ParseException e) {
+  System.err.println("Syntactic Error:\n" + e.getMessage());
+  }
+  catch(Exception e) {
+  System.err.println("Semantic error:\n" + e.getMessage()  );  
+  e.printStackTrace();
+  }
+ }  
+}
+
+PARSER_END(CompiladorExemploIntermediarioTotal)
+SKIP : { " " | "\t" | "\r" | "\n" }
+
+TOKEN [IGNORE_CASE] : {
+     <EXIBE: "exibe" >
+}
+TOKEN : {
+      <TIPO: "INT"|"BOOL"|"DOUBLE"|"CHAR"|"STRING"|"FLOAT">{
+            System.out.println("TIPO: "+image);
+      }
+      |
+      <ELSE: "else">{
+            System.out.println("ELSE: "+image);
+      }
+      |
+      <PRINT: "print">{
+            System.out.println("PRINT: " + image);
+      }
+      |
+      <IF: "if">{
+            System.out.println("IF: "+image);
+      }
+      |
+      <SWITCH: "switch">{
+            System.out.println("switch: "+image);
+      }
+      |
+      <CASE: "case">{
+            System.out.println("case: "+image);
+      }
+      |
+      <DEFAULT_SW: "default">{
+            System.out.println("default: "+image);
+      }
+      |
+      <BREAK: "break">{
+            System.out.println("break: "+image);
+      }
+      |
+      <FOR: "for" >{
+            System.out.println("Condicional: "+image);
+      }
+      |
+      <WHILE: "while">{
+            System.out.println("WHILE: "+image);
+      }
+      |
+      <DO: "do">{
+            System.out.println("DO:"+image);
+      }
+      |
+      <ADICAO: "+"> {
+            System.out.println("ADICAO: " + image);
+      } 
+      |
+      <SUB: "-"> {
+            System.out.println("SUBTRACAO: " + image);
+      }
+      |
+      <MULT: "*"> {
+            System.out.println("MULT: " + image);
+      }
+      |
+      <DIV: "/"> {
+            System.out.println("DIV: " + image);
+      }  
+      |
+      <POTENCIACAO: "^"> {
+            System.out.println("POTENCIACAO: " + image);
+      }
+      |
+      <RADICIACAO: "~"> {
+            System.out.println("RADICIACAO: " + image);
+      }
+      |
+      <OR: "||">{
+            System.out.println("OR: "+image);
+      }
+      |
+      <ORB: "|">{
+            System.out.println("ORB: "+image);
+      }
+      |
+      <AND: "&&">{
+            System.out.println("AND: "+image);
+      }
+      |
+      <ANDB: "&">{
+            System.out.println("ANDB: "+image);
+      }
+      |
+      <XOR: "#">{
+            System.out.println("XOR: "+image);
+      }
+      |
+      <NEGACAO: "!">{
+            System.out.println("NEGACAO: "+image);
+      }
+      |
+      <THEN: "then">{
+            System.out.println("THEN: "+image);
+      }
+      |
+      <SENTENCA_BOOLEANA: "true" | "false">{
+            System.out.println("SENTENCA_BOOLEANA: "+image);
+      }
+      |
+      <FUNC: "log" | "sin" | "cos"> {
+            System.out.println("Função: " + image);
+      }
+      |
+      <IDENTIFICADOR: <LETRA> (<LETRA>|<DIGITO>)* >{
+            System.out.println("Identificador: "+image);
+      }
+      |
+      <OPERADOR: ">"|"<"|">="|"<="|"=="|"!=">{
+            System.out.println("OPERADOR: "+image);
+      }
+      |
+      <STRING: <ASPAS> (<LETRA> | "\n" | <NUM> | "\r" | "\t" | " " | <DIGITO>)+ <ASPAS> >{
+            System.out.println("STRING: "+image);
+      }
+      |
+      <CHAR: <ASPAS> <LETRA> <ASPAS> >{
+            System.out.println("CHAR: "+image);
+      }
+      |
+      <LETRA: (["a"-"z"] |  ["A"-"Z"]) >{ 
+            System.out.println("Letra: "+image);
+      }
+      |
+      <NUM: ("-")?<DIGITO><PONTO><DIGITO>>{
+            System.out.println("Numero: "+image);
+      }
+      |
+      <DIGITO: ("-")?(["0"-"9"])+ >{
+            System.out.println("Digito: "+image);
+      }
+      |
+      <OPERADOR_TERNARIO: ":=">{
+            System.out.println("OPERADOR_TERNARIO: " +image);
+      }
+      |
+      <DOIS_PONTOS: ":" >{
+            System.out.println("DOIS_PONTOS: "+ image);
+      }
+      |
+      <INTERROGACAO: "?">{
+            System.out.println("INTERROGACAO: " + image);
+      }
+      |
+      <PONTO: "." >{
+            System.out.println("PONTO: "+image);
+      }
+      |
+      <ATRIB: "="  >{
+            System.out.println("ATRIB: "+image);
+      }
+      |
+      <ABRECH: "{" >{
+            System.out.println("ABRECH: "+image);
+      }
+      |
+      <FECHACH: "}">{
+            System.out.println("FECHACH: "+image);
+      }
+      |
+      <ABREPA: "(">{
+            System.out.println("ABREPA: "+image);
+      }
+      |
+      <FECHPA: ")">{
+            System.out.println("FECHPA: "+image);
+      }
+      |
+      <ASPAS: "'">{
+            System.out.println("ASPAS: " + image);
+      }
+      |
+      <PONTOVIRGULA: ";">{
+            System.out.println("PONTOVIRGULA: "+image);
+      }
+}
+
+LinkedList <Comando> inicio() : {Comando com=null; LinkedList<Comando> listaComandos = new LinkedList();}
+{
+   ( (com = linhaComando() 
+   {
+   listaComandos.add(com);
+   }) | (<DIV><MULT> <STRING> <MULT><DIV>)
+   )* <EOF>
+   {
+    return listaComandos;
+   }
+}
+////////////////////////////////////////////////////////////////////////////////
+Comando linhaComando() : {Comando com=null;}
+{
+      (LOOKAHEAD(5)(com = printa() <PONTOVIRGULA>) | (com = atribui() <PONTOVIRGULA>) | (com = condicional()) | (com = Switch()) | (com = iterativoWhile()) | (com = iterativoFor()) | (com = iterativoDoWhile() <PONTOVIRGULA>))
+      {
+      return com;
+     }
+}
+////////////////////////////////////////////////////////////////////////////////////
+Comando printa() : {Simbolo simb; Comando com=null; LinkedList<Item> listaExp = new LinkedList<Item>();}
+{
+      <PRINT> Or(listaExp)
+      {
+      simb = new Simbolo("_print" + printref, "STRING");
+      tabela.inclui(simb);
+      com = new Comando ('E', "_print" + printref, listaExp);
+      printref +=1;
+      return com;
+      }
+}
+////////////////////////////////////////////////////////////////////////////////////
+Comando atribui() : {Simbolo simb, simb2; Token t = null, tipo = null; Comando com=null, verificar = null, comandostrue = null, comandosfalse = null; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>(), listaExp3 = new LinkedList<Item>(), listaExp4 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosTrue = new LinkedList(), listaComandosFalse = new LinkedList(), verificacaoComando = new LinkedList();}
+{
+      [tipo = <TIPO>] t=<IDENTIFICADOR>
+      {
+            if(tipo == null){
+                  if(tabela.isExiste(t.image) == false){
+                        System.err.println("Syntactic Error: variable " + t.image + " might not have been initialized");
+                        System.exit(1);
+                  }
+            }
+            else{
+                  if(tabela.isExiste(t.image)){
+                        System.err.println("Warning: variable " + t.image + " already defined, then it will have its updated value");
+                  }
+                  else{
+                        if(tipo.image.equals("STRING")) simb = new Simbolo(removerAspas(t.image), tipo.image);
+                        else simb = new Simbolo(t.image, tipo.image);
+                        tabela.inclui(simb);
+                  }
+            }
+      }
+      ((<ATRIB> Or(listaExp)
+      {
+       com = new Comando ('A',t.image,listaExp);
+       return com;
+      })
+
+      |
+
+      (<OPERADOR_TERNARIO> <ABREPA> Or(listaExp2) <FECHPA> <INTERROGACAO> Or(listaExp3) <DOIS_PONTOS> Or(listaExp4)
+      {
+            simb2 = new Simbolo("_cond" + ifref, "BOOL");
+            tabela.inclui(simb2);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+
+
+            simb2 = new Simbolo("_true" + ifref, tipo.image);
+            tabela.inclui(simb2);
+            comandostrue = new Comando ('A',"_true"+ifref,listaExp3);
+            listaComandosTrue.add(comandostrue);
+            listaExp.add(new Item('l', listaComandosTrue));
+
+
+            simb2 = new Simbolo("_false" + ifref, tipo.image);
+            tabela.inclui(simb2);
+            comandosfalse = new Comando ('A',"_false"+ifref,listaExp4);
+            listaComandosFalse.add(comandosfalse);
+            listaExp.add(new Item('l', listaComandosFalse));
+
+            com = new Comando ('T', t.image , listaExp);
+            ifref += 1;
+            return com;
+      })
+      
+      |
+
+      (<ADICAO>(
+      (<ADICAO>{
+            listaExp.add(new Item('v', t.image));
+            listaExp.add(new Item('i', "1"));
+            listaExp.add(new Item('o', "+"));
+            com = new Comando ('A',t.image,listaExp);
+            return com;
+      }) 
+      | 
+      (<ATRIB>{
+            listaExp.add(new Item('v', t.image));
+      } Or(listaExp) {
+            listaExp.add(new Item('o', "+"));
+            com = new Comando ('A',t.image,listaExp);
+            return com;
+      })))
+
+      |
+
+      (<SUB>(
+      (<SUB>{
+            listaExp.add(new Item('v', t.image));
+            listaExp.add(new Item('i', "1"));
+            listaExp.add(new Item('o', "-"));
+            com = new Comando ('A',t.image,listaExp);
+            return com;
+      }) 
+      | 
+      (<ATRIB>{
+            listaExp.add(new Item('v', t.image));
+      } Or(listaExp) {
+            listaExp.add(new Item('o', "-"));
+            com = new Comando ('A',t.image,listaExp);
+            return com;
+      })))
+
+      )
+}
+
+Comando condicional():{Simbolo simb; Comando com=null, verificar = null, comandostrue = null, comandosfalse = null; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosTrue = new LinkedList(), listaComandosFalse = new LinkedList(), verificacaoComando = new LinkedList();}
+{
+      <IF> <ABREPA> Or(listaExp2) <FECHPA> <THEN> <ABRECH> (comandostrue = linhaComando(){
+            listaComandosTrue.add(comandostrue);
+      })*
+      <FECHACH> [<ELSE> <ABRECH> ( comandosfalse = linhaComando(){
+            listaComandosFalse.add(comandosfalse);
+      })* 
+      <FECHACH>]
+      {
+            simb = new Simbolo("_cond" + ifref, "BOOL");
+            tabela.inclui(simb);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+            listaExp.add(new Item('l', listaComandosTrue));
+            listaExp.add(new Item('l', listaComandosFalse));
+            com = new Comando ('I', "_cond"+ifref , listaExp);
+            ifref += 1;
+            return com;
+      }
+}
+
+Comando Switch():{Item caso = null; Simbolo simb = null; Comando com=null, verificar = null, comandoscase = null, comandosdefault = null; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosCase = new LinkedList(), listaComandosDefault = new LinkedList(), verificacaoComando = new LinkedList();}{
+      <SWITCH> <ABREPA> expressao1(listaExp2) 
+      {
+            simb = new Simbolo("_cond" + ifref, null);
+            tabela.inclui(simb);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+      }
+      <FECHPA> <ABRECH> (<CASE> caso = fator() <DOIS_PONTOS> (comandoscase = linhaComando()
+      {
+            listaComandosCase.add(comandoscase);
+      }
+      )*{
+            listaExp.add(caso);
+            listaExp.add(new Item('l', listaComandosCase));
+            listaComandosCase = new LinkedList();
+      }
+      <BREAK> <PONTOVIRGULA>)+ [<DEFAULT_SW> <DOIS_PONTOS> (comandosdefault = linhaComando()
+      {
+            listaComandosDefault.add(comandosdefault);
+      }
+      )*{
+            listaExp.add(new Item('o', "Default"));
+            listaExp.add(new Item('l', listaComandosDefault));
+      }]<FECHACH>
+      {
+            com = new Comando ('S', "_cond"+ifref , listaExp);
+            ifref += 1;
+            return com;
+      }
+}
+
+Comando iterativoWhile():{Simbolo simb; Comando com=null, verificar = null, comandostrue = null; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosTrue = new LinkedList(), verificacaoComando = new LinkedList();}
+{
+      <WHILE> <ABREPA> Or(listaExp2) <FECHPA> <ABRECH> (comandostrue = linhaComando(){
+            listaComandosTrue.add(comandostrue);
+      })*
+      <FECHACH>
+      {
+            simb = new Simbolo("_cond" + ifref, "BOOL");
+            tabela.inclui(simb);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+            listaExp.add(new Item('l', listaComandosTrue));
+            com = new Comando ('W', "_cond"+ifref , listaExp);
+            ifref += 1;
+            return com;
+      }
+}
+
+Comando iterativoFor():{Simbolo simb; Comando com=null, verificar = null, comandos1 = null, comandos2 = null, comandostrue; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosTrue = new LinkedList(), verificacaoComando = new LinkedList(), comandoAtrib = new LinkedList(), comandoItera = new LinkedList();}
+{
+      <FOR> <ABREPA> [comandos1 = atribui()] <PONTOVIRGULA> Or(listaExp2) <PONTOVIRGULA> [comandos2 = atribui()] <FECHPA> <ABRECH> (comandostrue = linhaComando(){
+            listaComandosTrue.add(comandostrue);
+      })*
+      <FECHACH>
+      {
+            comandoAtrib.add(comandos1);
+            listaExp.add(new Item('l', comandoAtrib));
+
+            simb = new Simbolo("_cond" + ifref, "BOOL");
+            tabela.inclui(simb);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+
+            listaExp.add(new Item('l', listaComandosTrue));
+
+            comandoItera.add(comandos2);
+            listaExp.add(new Item('l', comandoItera));
+
+            com = new Comando ('F', "_cond"+ifref , listaExp);
+            ifref += 1;
+            return com;
+
+      }
+}
+
+Comando iterativoDoWhile():{Simbolo simb; Comando com=null, verificar = null, comandostrue = null; LinkedList<Item> listaExp = new LinkedList<Item>(), listaExp2 = new LinkedList<Item>() ; LinkedList<Comando> listaComandosTrue = new LinkedList(), verificacaoComando = new LinkedList();}
+{
+      <DO> <ABRECH> (comandostrue = linhaComando(){
+            listaComandosTrue.add(comandostrue);
+      })*
+      <FECHACH> <WHILE> <ABREPA> Or(listaExp2) <FECHPA>
+      {
+            simb = new Simbolo("_cond" + ifref, "BOOL");
+            tabela.inclui(simb);
+            verificar = new Comando ('A',"_cond"+ifref,listaExp2);
+            verificacaoComando.add(verificar);
+            listaExp.add(new Item('l', verificacaoComando));
+            listaExp.add(new Item('l', listaComandosTrue));
+            com = new Comando ('D', "_cond"+ifref , listaExp);
+            ifref += 1;
+            return com;
+      }
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+void Expressao(LinkedList <Item> listaExp):{Token op = null; Item item = null, item2 = null;}{
+      (expressao1(listaExp) | (item = fatorbooleano()))
+      {
+            if(item != null) listaExp.add(item);
+      } 
+      (op = <OPERADOR> (expressao1(listaExp) | (item2 = fatorbooleano()))
+      {
+            if(item2 != null) listaExp.add(item2);
+            if(op != null) listaExp.add(new Item ('o', op.image));
+      }
+      )*
+}
+
+void Or(LinkedList <Item> listaExp):{Token n = null;}{
+    And(listaExp)  (n=<OR> And(listaExp){
+    if (n != null){
+      listaExp.add(new Item ('o',"or")); // a b or
+    }
+    }
+    )*
+}
+
+void And(LinkedList <Item> listaExp):{Token m=null;}{ 
+    OrBitwise(listaExp) ( m=<AND> OrBitwise(listaExp){ 
+      if (m!=null)
+            listaExp.add(new Item ('o',"and")); // a b and
+    })*
+}
+
+void OrBitwise(LinkedList <Item> listaExp):{Token m=null;}{ 
+      xOrBitwise(listaExp) (  m= <ORB>  xOrBitwise(listaExp){ 
+            if (m!=null)
+                  listaExp.add(new Item ('o',"orb")); // a b orb
+      })*
+}
+
+void xOrBitwise(LinkedList <Item> listaExp):{Token m=null;}{ 
+    AndBitwise(listaExp) (  m= <XOR>  AndBitwise(listaExp){ 
+      if (m!=null)
+            listaExp.add(new Item ('o',"xorb")); // a b xorb
+    })*
+}
+
+void AndBitwise(LinkedList <Item> listaExp):{Token m=null;}{ 
+    Expressao(listaExp) (  m= <ANDB>  Expressao(listaExp){ 
+    if (m!=null)
+            listaExp.add(new Item ('o',"andb")); // a b andb
+    }
+    )*
+}
+
+void expressao1(LinkedList <Item> listaExp) : {Token op=null;}{
+      expressao2(listaExp)
+      ( (op= <ADICAO> | op=<SUB>) expressao2(listaExp)
+      {
+            if(op.image.equals("+")){
+                  listaExp.add(new Item ('o',"+")); // a b +
+            }
+            else if (op.image.equals("-")){
+                  listaExp.add(new Item ('o',"-")); // a b -
+            }
+      }
+      )*
+}
+
+void expressao2(LinkedList <Item> listaExp): {Token op = null;}{
+      expressao3(listaExp)
+      ( (op= <MULT> | op=<DIV>) expressao3(listaExp)
+      {
+            if( op.image.equals("*")){
+                  listaExp.add(new Item ('o',"*")); // a b * 
+            }
+            else if(op.image.equals("/")){
+                  listaExp.add(new Item ('o',"/")); // a b / 
+            }
+      }
+      )*
+}
+
+void expressao3(LinkedList <Item> listaExp): {Token op = null;}{
+      expressao4(listaExp)
+      ((op = <POTENCIACAO> | op =<RADICIACAO>) expressao4(listaExp) //b
+      {
+            if( op.image.equals("^")){
+                  listaExp.add(new Item ('o',"^")); // a b ^    
+            }
+            else if(op.image.equals("~")){
+                  listaExp.add(new Item ('o',"~")); // a b ~  
+            }
+      }
+      )*
+}
+
+void expressao4(LinkedList <Item> listaExp): {Item item=null;}{
+      ( 
+      item= fator() 
+      { 
+            listaExp.add(item);
+      } 
+      |<ABREPA> Or(listaExp) <FECHPA>
+      )
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+Item fatorbooleano() : {Token t, negado = null, sinal = null; Item item=null;}{
+      [negado = <NEGACAO>] [sinal = <SUB>] (
+      t = <SENTENCA_BOOLEANA>
+      {     
+            if(negado != null){
+                  if(t.image == "true")
+                        item= new Item ('b', "false");
+                  else
+                        item= new Item ('b', "true");
+            }
+            else item= new Item ('b', t.image);
+            return item;
+      } |
+      t = <IDENTIFICADOR>
+      {
+            if(!tabela.isExiste(t.image))
+                  System.out.println("Erro semântico \n A variável "+t.image+"não foi inicializada");
+            if(sinal == null)
+                  if(negado != null && tabela.getTipo(t.image).equals("BOOL")){
+                        item= new Item ('v',"!" + t.image);
+                  }
+                  else if(negado != null){
+                        System.err.println("Syntactic error: incompatible types: "+ tabela.getTipo(t.image) +" cannot be converted to BOOLEAN");
+                        System.exit(1);
+                  }
+                  else  item= new Item ('v',t.image);
+            else{ 
+                  if(negado != null){
+                        System.err.println("Syntactic error: incompatible types: "+ tabela.getTipo(t.image) +" cannot be converted to BOOLEAN");
+                        System.exit(1);
+                  }
+                  item= new Item ('v',"-" + t.image);
+            }
+            return item;
+      })
+}
+
+Item fator() : {Token t, sinal = null; Item item=null;}{
+       (
+      t = <IDENTIFICADOR>
+      {
+            if(!tabela.isExiste(t.image))
+                  System.out.println("Erro semântico \n A variável "+t.image+"não foi inicializada");
+            if(sinal == null)
+                  item= new Item ('v',t.image);
+            else  
+                  item= new Item ('v',"-" + t.image);
+            return item;
+      } |
+      t = <DIGITO>
+      {
+            if(sinal == null)
+                  item= new Item ('i',t.image);
+            else  
+                  item= new Item ('i',"-" + t.image);
+            return item;
+      } |
+      t = <NUM>
+      {
+            if(sinal == null)
+                  item= new Item ('d',t.image);
+            else  
+                  item= new Item ('d',"-" + t.image);
+            return item;
+      } |
+      t = <CHAR>
+      {
+            item= new Item ('c',t.image);
+            return item;
+      } |
+      t = <STRING>
+      {
+            item= new Item ('s', removerAspas(t.image));
+            return item;
+      } )
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+String removerAspas(String input):{}{{
+        if (input.startsWith("'") && input.endsWith("'")) {
+            return input.substring(1, input.length() - 1);
+        }
+        return input;
+}}
